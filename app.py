@@ -30,6 +30,16 @@ SYSTEM_INSTRUCTION = """
 
 # --- アプリの構築 ---
 genai.configure(api_key=API_KEY)
+# --- ここで設定を作成 ---
+generation_config = {
+  "temperature": 1,
+  "top_p": 0.95,
+  "top_k": 40,
+  "max_output_tokens": 8192,
+  "response_mime_type": "text/plain",
+}
+
+# --- その設定を使ってモデルを定義 ---
 model = genai.GenerativeModel(
     model_name="gemini-3-pro-preview",
     generation_config=generation_config,
@@ -64,4 +74,5 @@ if prompt := st.chat_input("先生に相談してみよう（例：廊下を走�
         response = chat.send_message(prompt)
         st.markdown(response.text)
         st.session_state.messages.append({"role": "assistant", "content": response.text})
+
 
