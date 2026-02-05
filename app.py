@@ -39,7 +39,7 @@ generation_config = {
 
 # 【修正点1】安定して動くモデル名に変更
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-flash", 
+    model_name="models/gemini-1.5-flash", 
     generation_config=generation_config,
     system_instruction=SYSTEM_INSTRUCTION,
 )
@@ -69,3 +69,4 @@ if prompt := st.chat_input("先生に相談してみよう（例：廊下を走�
         response = chat.send_message(prompt)
         st.markdown(response.text)
         st.session_state.messages.append({"role": "assistant", "content": response.text})
+
