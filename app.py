@@ -2,10 +2,8 @@ import streamlit as st
 import google.generativeai as genai
 
 # --- 設定エリア ---
-# ここにAI Studioで取得したAPIキーを入れてください
 API_KEY = st.secrets["GEMINI_API_KEY"]
 
-# AI Studioで作成した「System Instruction（指示文）」をここに貼り付け
 SYSTEM_INSTRUCTION = """
 あなたの役割
 あなたは小学校5年生の国語教師です。単元「生活をよりよくするための提案」において、児童が自分の力で論理的な作文（提案書）を書けるようサポートする「作文アイディア・構成パートナー」として振る舞ってください。
@@ -30,7 +28,7 @@ SYSTEM_INSTRUCTION = """
 
 # --- アプリの構築 ---
 genai.configure(api_key=API_KEY)
-# --- ここで設定を作成 ---
+
 generation_config = {
   "temperature": 1,
   "top_p": 0.95,
@@ -39,9 +37,9 @@ generation_config = {
   "response_mime_type": "text/plain",
 }
 
-# --- その設定を使ってモデルを定義 ---
+# 【修正点1】安定して動くモデル名に変更
 model = genai.GenerativeModel(
-    model_name="gemini-3-pro-preview",
+    model_name="gemini-1.5-flash", 
     generation_config=generation_config,
     system_instruction=SYSTEM_INSTRUCTION,
 )
@@ -50,29 +48,24 @@ st.set_page_config(page_title="作文アイディア・パートナー", layout=
 st.title("📝 生活をよりよくするための提案")
 st.caption("5年生国語：作文のアイディアと構成をいっしょに考えよう！")
 
-# チャット履歴の初期化
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# 履歴の表示
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-# ユーザーの入力
 if prompt := st.chat_input("先生に相談してみよう（例：廊下を走る人が多くて困っています）"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
 
-    # AIの返信
     with st.chat_message("assistant"):
-        # 履歴を含めてAIに送信
+        # 【修正点2】モデルに合わせた履歴の形式に微調整
         chat = model.start_chat(history=[
-            {"role": m["role"], "parts": [m["content"]]} for m in st.session_state.messages[:-1]
+            {"role": "user" if m["role"] == "user" else "model", "parts": [m["content"]]} 
+            for m in st.session_state.messages[:-1]
         ])
         response = chat.send_message(prompt)
         st.markdown(response.text)
         st.session_state.messages.append({"role": "assistant", "content": response.text})
-
-
